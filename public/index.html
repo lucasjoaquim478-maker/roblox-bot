@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Bot - Configurador</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🤖</div>
+        <div>
+          <h1>Roblox Bot</h1>
+          <p class="subtitle">Configure tarefas de automação via site local</p>
+        </div>
+      </div>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Parado</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Game Config -->
+      <section class="card">
+        <div class="card-header">
+          <label>🎮 Jogo Roblox</label>
+        </div>
+        <div class="form-row">
+          <input type="text" id="gameUrl" class="input" placeholder="URL do jogo (ex: https://www.roblox.com/games/...)">
+          <button id="btnOpenGame" class="btn btn-secondary" title="Abrir no navegador">Abrir</button>
+        </div>
+        <p class="hint">Deixe o Roblox aberto em segundo plano. O bot controla a janela automaticamente.</p>
+      </section>
+
+      <!-- Task List -->
+      <section class="card">
+        <div class="card-header">
+          <label>📋 Tarefas</label>
+          <div class="card-actions">
+            <button id="btnAddTask" class="btn btn-sm btn-primary">+ Adicionar</button>
+            <button id="btnClearTasks" class="btn btn-sm btn-secondary">Limpar</button>
+          </div>
+        </div>
+
+        <div class="task-toolbar">
+          <div class="toolbar-group">
+            <button class="task-btn" data-type="click" title="Clica na posição atual">🖱️ Click</button>
+            <button class="task-btn" data-type="key" title="Pressiona uma tecla">⌨️ Tecla</button>
+            <button class="task-btn" data-type="wait" title="Aguarda um tempo">⏳ Esperar</button>
+            <button class="task-btn" data-type="type" title="Digita texto">📝 Digitar</button>
+            <button class="task-btn" data-type="scroll" title="Rola a tela">📜 Scroll</button>
+            <button class="task-btn" data-type="focus" title="Foca na janela do Roblox">🎯 Focar</button>
+            <button class="task-btn" data-type="move" title="Move o mouse">📍 Mover</button>
+          </div>
+          <button id="btnGetPos" class="btn btn-sm btn-secondary" title="Capturar posição atual">📍 Capturar Posição</button>
+        </div>
+
+        <div id="taskList" class="task-list">
+          <div class="empty">Nenhuma tarefa. Adicione com os botões acima.</div>
+        </div>
+
+        <div class="task-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="loopToggle">
+            🔁 Repetir tarefas em loop
+          </label>
+        </div>
+      </section>
+
+      <!-- Control -->
+      <section class="card control-card">
+        <button id="btnStart" class="btn btn-primary btn-large">
+          <span class="btn-icon">▶</span>
+          <span>Iniciar Bot</span>
+        </button>
+        <button id="btnStop" class="btn btn-danger btn-large" disabled>
+          <span class="btn-icon">⏹</span>
+          <span>Parar Bot</span>
+        </button>
+        <button id="btnSave" class="btn btn-secondary btn-large">
+          <span class="btn-icon">💾</span>
+          <span>Salvar Config</span>
+        </button>
+      </section>
+
+      <!-- Log -->
+      <section class="card">
+        <div class="card-header">
+          <label>📜 Log</label>
+          <button id="btnClearLog" class="btn btn-sm btn-secondary">Limpar</button>
+        </div>
+        <pre id="logOutput" class="log-box">Bot aguardando início...</pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

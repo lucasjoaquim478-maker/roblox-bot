@@ -1,0 +1,13 @@
+{
+  "name": "roblox-bot",
+  "version": "1.0.0",
+  "description": "Roblox Bot - Configure tarefas via site local",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
