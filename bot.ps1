@@ -1,4 +1,4 @@
-param($tasks = '[]', $loop = 'false')
+param($loop = 'false')
 
 Add-Type @"
 using System;
@@ -14,6 +14,9 @@ public class WinAPI {
   [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 }
 "@
+
+$raw = [Console]::In.ReadToEnd()
+$tasks = $raw | ConvertFrom-Json
 
 $MOUSEEVENTF_LEFTDOWN = 0x02
 $MOUSEEVENTF_LEFTUP = 0x04
@@ -153,7 +156,7 @@ function Play-Game($gameUrl) {
 }
 
 Write-Host "Bot Roblox iniciado"
-$taskList = $tasks | ConvertFrom-Json
+$taskList = $tasks
 $doLoop = $loop -eq 'true'
 $repeat = $true
 

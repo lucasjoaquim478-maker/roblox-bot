@@ -12,6 +12,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let botProcess = null;
 let isRunning = false;
+let botLogs = ['Bot aguardando início...'];
+
+function addLog(msg) {
+  const time = new Date().toLocaleTimeString();
+  botLogs.push(`[${time}] ${msg}`);
+  if (botLogs.length > 500) botLogs.shift();
+  console.log(`[Bot] ${msg}`);
+}
 
 function loadConfig() {
   try {
@@ -37,6 +45,15 @@ app.get('/api/status', (req, res) => {
   res.json({ running: isRunning });
 });
 
+app.get('/api/bot/logs', (req, res) => {
+  res.json({ logs: botLogs });
+});
+
+app.post('/api/bot/logs/clear', (req, res) => {
+  botLogs = ['Log limpo.'];
+  res.json({ ok: true });
+});
+
 app.post('/api/bot/start', async (req, res) => {
   if (isRunning) return res.status(400).json({ error: 'Bot já está rodando' });
 
@@ -48,30 +65,33 @@ app.post('/api/bot/start', async (req, res) => {
   }
 
   const scriptPath = path.join(__dirname, 'bot.ps1');
-  const tasksJson = JSON.stringify(config.tasks);
   const loop = config.loop ? '$true' : '$false';
+  const tasksJson = JSON.stringify(config.tasks);
 
   try {
     botProcess = spawn('powershell', [
       '-NoProfile', '-ExecutionPolicy', 'Bypass',
       '-File', scriptPath,
-      '-tasks', tasksJson,
       '-loop', loop
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
 
     botProcess.stdout.on('data', (data) => {
-      console.log(`[Bot] ${data.toString().trim()}`);
+      const lines = data.toString().trim().split('\n');
+      lines.forEach(l => addLog(l.trim()));
     });
 
     botProcess.stderr.on('data', (data) => {
-      console.error(`[Bot Error] ${data.toString().trim()}`);
+      addLog('ERRO: ' + data.toString().trim());
     });
 
     botProcess.on('close', (code) => {
-      console.log(`[Bot] Finalizado (código ${code})`);
+      addLog(`Finalizado (código ${code})`);
       isRunning = false;
       botProcess = null;
     });
+
+    botProcess.stdin.write(tasksJson + '\n');
+    botProcess.stdin.end();
 
     isRunning = true;
     res.json({ ok: true });

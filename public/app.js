@@ -62,7 +62,9 @@ const App = {
     el.btnStart.addEventListener('click', () => this.startBot());
     el.btnStop.addEventListener('click', () => this.stopBot());
     el.btnSave.addEventListener('click', () => this.saveConfig());
-    el.btnClearLog.addEventListener('click', () => { el.logOutput.textContent = 'Log limpo.'; });
+    el.btnClearLog.addEventListener('click', () => {
+      fetch('/api/bot/logs/clear', { method: 'POST' }).catch(() => {});
+    });
     el.btnOpenGame.addEventListener('click', () => {
       const url = el.gameUrl.value.trim();
       if (url) window.open(url, '_blank');
@@ -330,14 +332,23 @@ const App = {
   async pollStatus() {
     setInterval(async () => {
       try {
-        const resp = await fetch('/api/status');
-        if (resp.ok) {
-          const data = await resp.json();
+        const [statusResp, logsResp] = await Promise.all([
+          fetch('/api/status'),
+          fetch('/api/bot/logs')
+        ]);
+        if (statusResp.ok) {
+          const data = await statusResp.json();
           if (data.running !== this.isRunning) {
             this.isRunning = data.running;
             this.updateUI();
             if (!this.isRunning) this.log('Bot finalizado');
           }
+        }
+        if (logsResp.ok) {
+          const logData = await logsResp.json();
+          const el = this.elements.logOutput;
+          el.textContent = logData.logs.join('\n');
+          el.scrollTop = el.scrollHeight;
         }
       } catch {}
     }, 2000);
