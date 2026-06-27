@@ -1,4 +1,4 @@
-param($loop = 'false')
+param($tasksFile = '', $loop = 'false')
 
 Add-Type @"
 using System;
@@ -15,7 +15,10 @@ public class WinAPI {
 }
 "@
 
-$raw = [Console]::In.ReadToEnd()
+Add-Type -AssemblyName System.Windows.Forms
+
+if ([string]::IsNullOrEmpty($tasksFile)) { Write-Host "Nenhum arquivo de tasks"; exit 1 }
+$raw = Get-Content $tasksFile -Raw -Encoding UTF8
 $tasks = $raw | ConvertFrom-Json
 
 $MOUSEEVENTF_LEFTDOWN = 0x02
@@ -139,10 +142,13 @@ function Play-Game($gameUrl) {
   Write-Host "Clicando em Play..."
   Start-Sleep -Milliseconds 3000
 
-  $shell = New-Object -ComObject WScript.Shell
-  for ($i = 0; $i -lt 8; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 250 }
-  Start-Sleep -Milliseconds 500
-  $shell.SendKeys("{ENTER}")
+  $w = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width
+  $h = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height
+  $playX = [math]::Round($w / 2)
+  $playY = [math]::Round($h * 0.38)
+
+  Write-Host "Tela: ${w}x${h}, clicando em Play em ($playX, $playY)"
+  Click-Mouse $playX $playY
 
   Write-Host "Play clicado! Aguardando Roblox iniciar..."
   Start-Sleep -Milliseconds 10000
@@ -151,6 +157,15 @@ function Play-Game($gameUrl) {
   for ($i = 0; $i -lt 25; $i++) {
     if (Focus-RobloxWindow) { $found = $true; break }
     Start-Sleep -Milliseconds 1000
+  }
+  if (-not $found) {
+    Write-Host "Tentando clicar de novo em posicao alternativa..."
+    Click-Mouse $playX ($playY + 100)
+    Start-Sleep -Milliseconds 12000
+    for ($i = 0; $i -lt 20; $i++) {
+      if (Focus-RobloxWindow) { $found = $true; break }
+      Start-Sleep -Milliseconds 1000
+    }
   }
   if (-not $found) { Write-Host "Janela Roblox nao encontrada apos iniciar" }
 }

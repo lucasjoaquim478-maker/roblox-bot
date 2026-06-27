@@ -69,9 +69,13 @@ app.post('/api/bot/start', async (req, res) => {
   const tasksJson = JSON.stringify(config.tasks);
 
   try {
+    const tmpFile = path.join(__dirname, 'tasks_' + Date.now() + '.json');
+    fs.writeFileSync(tmpFile, tasksJson, 'utf8');
+
     botProcess = spawn('powershell', [
       '-NoProfile', '-ExecutionPolicy', 'Bypass',
       '-File', scriptPath,
+      '-tasksFile', tmpFile,
       '-loop', loop
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
 
@@ -88,6 +92,7 @@ app.post('/api/bot/start', async (req, res) => {
       addLog(`Finalizado (código ${code})`);
       isRunning = false;
       botProcess = null;
+      try { fs.unlinkSync(tmpFile); } catch {}
     });
 
     botProcess.stdin.write(tasksJson + '\n');
