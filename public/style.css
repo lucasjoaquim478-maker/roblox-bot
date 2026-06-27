@@ -72,6 +72,8 @@ header {
 .btn-secondary:hover { background: var(--border); color: var(--text); }
 .btn-danger { background: var(--danger); color: #fff; padding: 8px 18px; font-size: 13px; }
 .btn-danger:hover { opacity: 0.9; }
+.btn-success { background: var(--success); color: #fff; padding: 8px 18px; font-size: 13px; }
+.btn-success:hover { opacity: 0.9; }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 .btn-large { flex: 1; padding: 12px 20px; font-size: 15px; justify-content: center; }
 

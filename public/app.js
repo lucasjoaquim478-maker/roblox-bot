@@ -9,7 +9,7 @@ const App = {
   taskIcons: {
     click: '🖱️', move: '📍', key: '⌨️',
     wait: '⏳', type: '📝', scroll: '📜',
-    focus: '🎯', open: '🌐',
+    focus: '🎯', open: '🌐', play: '▶️',
   },
 
   taskLabels: {
@@ -17,6 +17,7 @@ const App = {
     key: 'Tecla', wait: 'Esperar',
     type: 'Digitar', scroll: 'Scroll',
     focus: 'Focar janela', open: 'Abrir URL',
+    play: 'Entrar no jogo',
   },
 
   init() {
@@ -40,6 +41,7 @@ const App = {
       btnGetPos: document.querySelector('#btnGetPos'),
       btnOpenGame: document.querySelector('#btnOpenGame'),
       btnLogin: document.querySelector('#btnLogin'),
+      btnLoginGame: document.querySelector('#btnLoginGame'),
       loginUser: document.querySelector('#loginUser'),
       loginPass: document.querySelector('#loginPass'),
       statusDot: document.querySelector('#statusDot'),
@@ -66,6 +68,7 @@ const App = {
       if (url) window.open(url, '_blank');
     });
     el.btnLogin.addEventListener('click', () => this.doLogin());
+    el.btnLoginGame.addEventListener('click', () => this.doLoginAndPlay());
     el.btnGetPos.addEventListener('click', () => this.getMousePosition());
   },
 
@@ -101,6 +104,45 @@ const App = {
     }
 
     setTimeout(() => { this.elements.btnLogin.disabled = false; }, 10000);
+  },
+
+  async doLoginAndPlay() {
+    const user = this.elements.loginUser.value.trim();
+    const pass = this.elements.loginPass.value.trim();
+    const gameUrl = this.elements.gameUrl.value.trim();
+    if (!user || !pass) { this.log('⚠️ Preencha usuário e senha primeiro'); return; }
+    if (!gameUrl) { this.log('⚠️ Preencha a URL do jogo primeiro'); return; }
+
+    this.log('🤖 Login automático + Entrar no jogo...');
+    this.elements.btnLoginGame.disabled = true;
+
+    const tasks = [
+      { type: 'open', url: 'https://www.roblox.com/login' },
+      { type: 'wait', ms: 5000 },
+      { type: 'login', user, pass },
+      { type: 'open', url: gameUrl },
+      { type: 'wait', ms: 7000 },
+      { type: 'play', gameUrl },
+    ];
+
+    try {
+      const resp = await fetch('/api/bot/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasks, loop: false }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        this.log(`❌ ${err.error}`);
+      } else {
+        this.isRunning = true;
+        this.updateUI();
+      }
+    } catch (e) {
+      this.log(`❌ Erro: ${e.message}`);
+    }
+
+    setTimeout(() => { this.elements.btnLoginGame.disabled = false; }, 30000);
   },
 
   getMousePosition() {
@@ -168,6 +210,9 @@ const App = {
       focus: `<h3>🎯 Focar Janela</h3><p style="color:var(--text-secondary);font-size:13px">Ativa a janela do Roblox.</p>`,
       open: `<h3>🌐 Abrir URL</h3>
         <div class="form-group"><label>URL</label><input data-field="url" type="text" placeholder="https://..."></div>`,
+      play: `<h3>▶️ Entrar no Jogo</h3>
+        <div class="form-group"><label>URL do Jogo</label><input data-field="gameUrl" type="text" placeholder="https://www.roblox.com/games/..."></div>
+        <p style="color:var(--text-secondary);font-size:13px">Abre a página do jogo, clica em Play e foca no Roblox.</p>`,
     };
 
     return `<div class="modal">${fields[type] || fields.click}${common}</div>`;
@@ -194,6 +239,7 @@ const App = {
         case 'scroll': label = `Scroll <span class="highlight">${t.amount}</span>`; break;
         case 'focus':  label = `Focar janela Roblox`; break;
         case 'open':   label = `Abrir <span class="highlight">${t.url}</span>`; break;
+        case 'play':   label = `Entrar no jogo`; break;
         default: label = t.type;
       }
 

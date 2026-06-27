@@ -116,20 +116,40 @@ function Do-Login($user, $pass) {
 
   $shell = New-Object -ComObject WScript.Shell
 
-  for ($i = 0; $i -lt 8; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 300 }
+  for ($i = 0; $i -lt 10; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 250 }
   Start-Sleep -Milliseconds 500
 
   $shell.SendKeys($user)
-  Start-Sleep -Milliseconds 500
+  Start-Sleep -Milliseconds 400
   $shell.SendKeys("{TAB}")
-  Start-Sleep -Milliseconds 500
+  Start-Sleep -Milliseconds 400
   $shell.SendKeys($pass)
-  Start-Sleep -Milliseconds 500
+  Start-Sleep -Milliseconds 400
   $shell.SendKeys("{ENTER}")
 
   Write-Host "Login enviado! Aguardando autenticacao..."
-  Start-Sleep -Milliseconds 5000
-  Write-Host "Login concluido (verifique se entrou)"
+  Start-Sleep -Milliseconds 8000
+  Write-Host "Login concluido"
+}
+
+function Play-Game($gameUrl) {
+  Write-Host "Clicando em Play..."
+  Start-Sleep -Milliseconds 3000
+
+  $shell = New-Object -ComObject WScript.Shell
+  for ($i = 0; $i -lt 8; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 250 }
+  Start-Sleep -Milliseconds 500
+  $shell.SendKeys("{ENTER}")
+
+  Write-Host "Play clicado! Aguardando Roblox iniciar..."
+  Start-Sleep -Milliseconds 10000
+
+  $found = $false
+  for ($i = 0; $i -lt 25; $i++) {
+    if (Focus-RobloxWindow) { $found = $true; break }
+    Start-Sleep -Milliseconds 1000
+  }
+  if (-not $found) { Write-Host "Janela Roblox nao encontrada apos iniciar" }
 }
 
 Write-Host "Bot Roblox iniciado"
@@ -152,8 +172,9 @@ while ($repeat) {
       'wait'     { Wait-Ms $task.ms }
       'scroll'   { Scroll-Mouse $task.amount }
       'focus'    { Focus-RobloxWindow }
-      'open'     { Start-Process $task.url; Write-Host "Abrindo URL: $($task.url)"; Start-Sleep -Milliseconds 2000 }
+      'open'     { Start-Process $task.url; Write-Host "Abrindo URL: $($task.url)"; Start-Sleep -Milliseconds 3000 }
       'login'    { Do-Login $task.user $task.pass }
+      'play'     { Play-Game $task.gameUrl }
       default    { Write-Host "Tarefa desconhecida: $type" }
     }
 
