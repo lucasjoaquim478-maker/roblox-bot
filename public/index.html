@@ -14,7 +14,7 @@
         <div class="logo-icon">🤖</div>
         <div>
           <h1>Roblox Bot</h1>
-          <p class="subtitle">Configure tarefas de automação via site local</p>
+          <p class="subtitle">Automação de tarefas + login automático</p>
         </div>
       </div>
       <div class="status-badge" id="statusBadge">
@@ -24,6 +24,21 @@
     </header>
 
     <main>
+      <!-- Login -->
+      <section class="card">
+        <div class="card-header">
+          <label>🔑 Login Roblox</label>
+          <div class="card-actions">
+            <button id="btnLogin" class="btn btn-sm btn-primary">Login Automático</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <input type="text" id="loginUser" class="input" placeholder="Usuário ou email" style="flex:1">
+          <input type="password" id="loginPass" class="input" placeholder="Senha" style="flex:1">
+        </div>
+        <p class="hint">O bot abre roblox.com/login, preenche os dados e clica em Entrar. As credenciais ficam salvas só no seu PC.</p>
+      </section>
+
       <!-- Game Config -->
       <section class="card">
         <div class="card-header">
@@ -33,7 +48,7 @@
           <input type="text" id="gameUrl" class="input" placeholder="URL do jogo (ex: https://www.roblox.com/games/...)">
           <button id="btnOpenGame" class="btn btn-secondary" title="Abrir no navegador">Abrir</button>
         </div>
-        <p class="hint">Deixe o Roblox aberto em segundo plano. O bot controla a janela automaticamente.</p>
+        <p class="hint">Após logar, o bot pode abrir o jogo automaticamente com a tarefa "Abrir Jogo".</p>
       </section>
 
       <!-- Task List -->
@@ -48,19 +63,20 @@
 
         <div class="task-toolbar">
           <div class="toolbar-group">
-            <button class="task-btn" data-type="click" title="Clica na posição atual">🖱️ Click</button>
-            <button class="task-btn" data-type="key" title="Pressiona uma tecla">⌨️ Tecla</button>
-            <button class="task-btn" data-type="wait" title="Aguarda um tempo">⏳ Esperar</button>
+            <button class="task-btn" data-type="click" title="Clica na posição">🖱️ Click</button>
+            <button class="task-btn" data-type="key" title="Pressiona tecla">⌨️ Tecla</button>
+            <button class="task-btn" data-type="wait" title="Aguarda tempo">⏳ Esperar</button>
             <button class="task-btn" data-type="type" title="Digita texto">📝 Digitar</button>
             <button class="task-btn" data-type="scroll" title="Rola a tela">📜 Scroll</button>
-            <button class="task-btn" data-type="focus" title="Foca na janela do Roblox">🎯 Focar</button>
-            <button class="task-btn" data-type="move" title="Move o mouse">📍 Mover</button>
+            <button class="task-btn" data-type="focus" title="Foca no Roblox">🎯 Focar</button>
+            <button class="task-btn" data-type="move" title="Move mouse">📍 Mover</button>
+            <button class="task-btn" data-type="open" title="Abre URL no navegador">🌐 Abrir</button>
           </div>
-          <button id="btnGetPos" class="btn btn-sm btn-secondary" title="Capturar posição atual">📍 Capturar Posição</button>
+          <button id="btnGetPos" class="btn btn-sm btn-secondary">📍 Capturar Posição</button>
         </div>
 
         <div id="taskList" class="task-list">
-          <div class="empty">Nenhuma tarefa. Adicione com os botões acima.</div>
+          <div class="empty">Nenhuma tarefa.</div>
         </div>
 
         <div class="task-options">
@@ -83,7 +99,7 @@
         </button>
         <button id="btnSave" class="btn btn-secondary btn-large">
           <span class="btn-icon">💾</span>
-          <span>Salvar Config</span>
+          <span>Salvar</span>
         </button>
       </section>
 

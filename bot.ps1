@@ -110,6 +110,28 @@ function Get-MousePosition() {
   return @{ x = $pos.X; y = $pos.Y }
 }
 
+function Do-Login($user, $pass) {
+  Write-Host "Iniciando login com usuario: $user"
+  Start-Sleep -Milliseconds 3000
+
+  $shell = New-Object -ComObject WScript.Shell
+
+  for ($i = 0; $i -lt 8; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 300 }
+  Start-Sleep -Milliseconds 500
+
+  $shell.SendKeys($user)
+  Start-Sleep -Milliseconds 500
+  $shell.SendKeys("{TAB}")
+  Start-Sleep -Milliseconds 500
+  $shell.SendKeys($pass)
+  Start-Sleep -Milliseconds 500
+  $shell.SendKeys("{ENTER}")
+
+  Write-Host "Login enviado! Aguardando autenticacao..."
+  Start-Sleep -Milliseconds 5000
+  Write-Host "Login concluido (verifique se entrou)"
+}
+
 Write-Host "Bot Roblox iniciado"
 $taskList = $tasks | ConvertFrom-Json
 $doLoop = $loop -eq 'true'
@@ -130,6 +152,8 @@ while ($repeat) {
       'wait'     { Wait-Ms $task.ms }
       'scroll'   { Scroll-Mouse $task.amount }
       'focus'    { Focus-RobloxWindow }
+      'open'     { Start-Process $task.url; Write-Host "Abrindo URL: $($task.url)"; Start-Sleep -Milliseconds 2000 }
+      'login'    { Do-Login $task.user $task.pass }
       default    { Write-Host "Tarefa desconhecida: $type" }
     }
 
