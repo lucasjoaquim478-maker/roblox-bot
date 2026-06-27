@@ -96,10 +96,22 @@ function Wait-Ms($ms) {
 }
 
 function Focus-RobloxWindow() {
-  $hwnd = [WinAPI]::FindWindow([NullString]::Value, "Roblox")
-  if ($hwnd -eq [IntPtr]::Zero) {
-    $hwnd = [WinAPI]::FindWindow([NullString]::Value, "Roblox Player")
+  $names = @("Roblox", "Roblox Player", "RobloxPlayerBeta", "RobloxGameLauncher")
+  $hwnd = [IntPtr]::Zero
+  foreach ($n in $names) {
+    $hwnd = [WinAPI]::FindWindow([NullString]::Value, $n)
+    if ($hwnd -ne [IntPtr]::Zero) { break }
   }
+
+  if ($hwnd -eq [IntPtr]::Zero) {
+    $proc = Get-Process -Name "RobloxPlayerBeta" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($proc) { $hwnd = $proc.MainWindowHandle }
+  }
+  if ($hwnd -eq [IntPtr]::Zero) {
+    $proc = Get-Process -Name "RobloxPlayer" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($proc) { $hwnd = $proc.MainWindowHandle }
+  }
+
   if ($hwnd -ne [IntPtr]::Zero) {
     [WinAPI]::ShowWindow($hwnd, 1)
     [WinAPI]::SetForegroundWindow($hwnd)
@@ -120,21 +132,32 @@ function Do-Login($user, $pass) {
   Write-Host "Iniciando login com usuario: $user"
   Start-Sleep -Milliseconds 3000
 
-  $shell = New-Object -ComObject WScript.Shell
+  $w = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width
+  $h = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height
+  $cx = [math]::Round($w / 2)
+  $cy = [math]::Round($h / 2)
 
-  for ($i = 0; $i -lt 10; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 250 }
+  Click-Mouse $cx [math]::Round($h * 0.3)
+  Start-Sleep -Milliseconds 1000
+
+  $shell = New-Object -ComObject WScript.Shell
+  Write-Host "Navegando ate o formulario de login..."
+  for ($i = 0; $i -lt 14; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 200 }
+
+  Write-Host "Digitando usuario..."
+  $shell.SendKeys($user)
   Start-Sleep -Milliseconds 500
 
-  $shell.SendKeys($user)
-  Start-Sleep -Milliseconds 400
   $shell.SendKeys("{TAB}")
   Start-Sleep -Milliseconds 400
-  $shell.SendKeys($pass)
-  Start-Sleep -Milliseconds 400
-  $shell.SendKeys("{ENTER}")
 
+  Write-Host "Digitando senha..."
+  $shell.SendKeys($pass)
+  Start-Sleep -Milliseconds 500
+
+  $shell.SendKeys("{ENTER}")
   Write-Host "Login enviado! Aguardando autenticacao..."
-  Start-Sleep -Milliseconds 8000
+  Start-Sleep -Milliseconds 10000
   Write-Host "Login concluido"
 }
 
@@ -144,30 +167,45 @@ function Play-Game($gameUrl) {
 
   $w = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width
   $h = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height
-  $playX = [math]::Round($w / 2)
-  $playY = [math]::Round($h * 0.38)
+  $cx = [math]::Round($w / 2)
 
-  Write-Host "Tela: ${w}x${h}, clicando em Play em ($playX, $playY)"
-  Click-Mouse $playX $playY
-
-  Write-Host "Play clicado! Aguardando Roblox iniciar..."
-  Start-Sleep -Milliseconds 10000
+  $positions = @(
+    @{ x = $cx; y = [math]::Round($h * 0.42) },
+    @{ x = $cx; y = [math]::Round($h * 0.48) },
+    @{ x = $cx; y = [math]::Round($h * 0.35) }
+  )
 
   $found = $false
-  for ($i = 0; $i -lt 25; $i++) {
-    if (Focus-RobloxWindow) { $found = $true; break }
-    Start-Sleep -Milliseconds 1000
+  for ($attempt = 0; $attempt -lt $positions.Count; $attempt++) {
+    $px = $positions[$attempt].x
+    $py = $positions[$attempt].y
+    Write-Host "Tentativa $($attempt+1): Play em ($px, $py)"
+    Click-Mouse $px $py
+
+    $waitTime = if ($attempt -eq 0) { 10000 } else { 8000 }
+    Start-Sleep -Milliseconds $waitTime
+
+    for ($i = 0; $i -lt 10; $i++) {
+      if (Focus-RobloxWindow) { $found = $true; break }
+      Start-Sleep -Milliseconds 1000
+    }
+    if ($found) { break }
   }
+
   if (-not $found) {
-    Write-Host "Tentando clicar de novo em posicao alternativa..."
-    Click-Mouse $playX ($playY + 100)
+    Write-Host "Mouse nao achou, tentando Tab + Enter..."
+    $shell = New-Object -ComObject WScript.Shell
+    for ($i = 0; $i -lt 12; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 200 }
+    Start-Sleep -Milliseconds 500
+    $shell.SendKeys("{ENTER}")
     Start-Sleep -Milliseconds 12000
-    for ($i = 0; $i -lt 20; $i++) {
+    for ($i = 0; $i -lt 15; $i++) {
       if (Focus-RobloxWindow) { $found = $true; break }
       Start-Sleep -Milliseconds 1000
     }
   }
-  if (-not $found) { Write-Host "Janela Roblox nao encontrada apos iniciar" }
+
+  if ($found) { Write-Host "Jogo iniciado!" } else { Write-Host "Nao foi possivel entrar no jogo" }
 }
 
 Write-Host "Bot Roblox iniciado"

@@ -42,6 +42,7 @@ const App = {
       btnOpenGame: document.querySelector('#btnOpenGame'),
       btnLogin: document.querySelector('#btnLogin'),
       btnLoginGame: document.querySelector('#btnLoginGame'),
+      btnPlayDirect: document.querySelector('#btnPlayDirect'),
       loginUser: document.querySelector('#loginUser'),
       loginPass: document.querySelector('#loginPass'),
       statusDot: document.querySelector('#statusDot'),
@@ -71,6 +72,7 @@ const App = {
     });
     el.btnLogin.addEventListener('click', () => this.doLogin());
     el.btnLoginGame.addEventListener('click', () => this.doLoginAndPlay());
+    el.btnPlayDirect.addEventListener('click', () => this.doPlayDirect());
     el.btnGetPos.addEventListener('click', () => this.getMousePosition());
   },
 
@@ -145,6 +147,39 @@ const App = {
     }
 
     setTimeout(() => { this.elements.btnLoginGame.disabled = false; }, 30000);
+  },
+
+  async doPlayDirect() {
+    const gameUrl = this.elements.gameUrl.value.trim();
+    if (!gameUrl) { this.log('⚠️ Preencha a URL do jogo primeiro'); return; }
+
+    this.log('▶️ Abrindo jogo direto (sem login)...');
+    this.elements.btnPlayDirect.disabled = true;
+
+    const tasks = [
+      { type: 'open', url: gameUrl },
+      { type: 'wait', ms: 8000 },
+      { type: 'play', gameUrl },
+    ];
+
+    try {
+      const resp = await fetch('/api/bot/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasks, loop: false }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        this.log(`❌ ${err.error}`);
+      } else {
+        this.isRunning = true;
+        this.updateUI();
+      }
+    } catch (e) {
+      this.log(`❌ Erro: ${e.message}`);
+    }
+
+    setTimeout(() => { this.elements.btnPlayDirect.disabled = false; }, 25000);
   },
 
   getMousePosition() {
