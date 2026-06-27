@@ -135,9 +135,9 @@ function Do-Login($user, $pass) {
   $w = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width
   $h = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height
   $cx = [math]::Round($w / 2)
-  $cy = [math]::Round($h / 2)
+  $cy = [math]::Round($h * 0.3)
 
-  Click-Mouse $cx [math]::Round($h * 0.3)
+  Click-Mouse $cx $cy
   Start-Sleep -Milliseconds 1000
 
   $shell = New-Object -ComObject WScript.Shell
@@ -198,7 +198,7 @@ function Play-Game($gameUrl) {
     for ($i = 0; $i -lt 12; $i++) { $shell.SendKeys("{TAB}"); Start-Sleep -Milliseconds 200 }
     Start-Sleep -Milliseconds 500
     $shell.SendKeys("{ENTER}")
-    Start-Sleep -Milliseconds 12000
+    Start-Sleep -Milliseconds 15000
     for ($i = 0; $i -lt 15; $i++) {
       if (Focus-RobloxWindow) { $found = $true; break }
       Start-Sleep -Milliseconds 1000
